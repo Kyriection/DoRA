@@ -14,7 +14,7 @@ CUDA_VISIBLE_DEVICES=$1 python finetune.py \
     --batch_size 16  --micro_batch_size 1 --num_epochs 3 \
     --learning_rate 1e-4 --cutoff_len 256 --val_set_size 120 \
     --eval_step 80 --save_step 80  --adapter_name dora \
-    --target_modules '["q_proj", "k_proj", "v_proj", "o_proj", "up_proj", "gate_proj", "down_proj"]' \
+    --target_modules '["q_proj", "k_proj", "v_proj", "up_proj", "down_proj"]' \
     --lora_r 32 --lora_alpha 64
 
 for task in boolq piqa social_i_qa hellaswag winogrande ARC-Challenge ARC-Easy openbookqa; do
