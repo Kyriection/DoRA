@@ -34,7 +34,7 @@
 
 
 WORLD_SIZE=1 CUDA_VISIBLE_DEVICES=0 torchrun --nproc_per_node=1 --master_port=3192 full_finetune.py \
-    --base_model 'meta-llama/Meta-Llama-3-8B' \
+    --base_model 'openlm-research/open_llama_3b_v2' \
     --data_path 'commonsense_170k.json' \
     --output_dir $1 \
     --batch_size 16 --micro_batch_size 1 --num_epochs 3 \
