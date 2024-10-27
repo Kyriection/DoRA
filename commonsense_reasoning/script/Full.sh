@@ -36,7 +36,8 @@
 WORLD_SIZE=2 CUDA_VISIBLE_DEVICES=0,1 torchrun --nproc_per_node=2 --master_port=3192 full_finetune.py \
     --base_model 'meta-llama/Meta-Llama-3-8B' \
     --data_path 'commonsense_170k.json' \
-    --output_dir $2 \
+    --output_dir $1 \
     --batch_size 16 --micro_batch_size 1 --num_epochs 3 \
     --learning_rate 3e-4 --cutoff_len 256 --val_set_size 120 \
     --eval_step 80 --save_step 80 
+
