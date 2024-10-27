@@ -14,7 +14,7 @@ CUDA_VISIBLE_DEVICES=$4 python finetune.py \
     --batch_size 16  --micro_batch_size 1 --num_epochs 3 \
     --learning_rate 1e-4 --cutoff_len 256 --val_set_size 120 \
     --eval_step 80 --save_step 80  --adapter_name dora \
-    --target_modules '["q_proj", "k_proj", "v_proj", "up_proj", "down_proj"]' \
+    --target_modules '["q_proj", "k_proj", "v_proj", "o_proj", "up_proj", "gate_proj", "down_proj"]' \
     --lora_r $1 --lora_alpha $2
 
 CUDA_VISIBLE_DEVICES=$4 python commonsense_evaluate.py \
