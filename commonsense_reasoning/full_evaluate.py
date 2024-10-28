@@ -255,7 +255,7 @@ def load_model(args) -> tuple:
     if device == "cuda":
         print(f'loading from {lora_weights}')
         model = AutoModelForCausalLM.from_pretrained(
-            base_model,
+            lora_weights,
             load_in_8bit=load_8bit,
             torch_dtype=torch.float16,
             device_map="auto",
