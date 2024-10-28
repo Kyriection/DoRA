@@ -4,6 +4,7 @@ from typing import List
 
 import fire
 import torch
+import torch.nn as nn 
 import transformers
 from datasets import load_dataset
 from typing import List, Optional, Union
@@ -18,6 +19,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, LlamaTokenizer, Au
 from transformers.trainer_pt_utils import get_model_param_count
 
 def train(
+        optimizer_name: str = "adamw",
         # model/data params
         base_model: str = "",  # the only required argument
         data_path: str = "yahma/alpaca-cleaned",
@@ -45,6 +47,11 @@ def train(
         wandb_watch: str = "",  # options: false | gradients | all
         wandb_log_model: str = "",  # options: false | true
         resume_from_checkpoint: str = None,  # either training checkpoint or final adapter
+        # galore params
+        galore_rank: int = 8,
+        galore_update_proj_gap: int = 1000,
+        galore_scale: float = 0.25,
+        galore_proj_type: str = "std"
 ):
     print(
         f"Finetuning model with params:\n"
@@ -214,21 +221,65 @@ def train(
         model.is_parallelizable = True
         model.model_parallel = True
 
+
+    from galore_torch import GaLoreAdamW, GaLoreAdamW_sgd
+
+    trainable_params = [p for p in model.parameters() if p.requires_grad]
+
+    galore_params = []
+    target_modules_list = ["attn", "mlp"]
+    for module_name, module in model.named_modules():
+        if not isinstance(module, nn.Linear): continue
+        if not any(target_key in module_name for target_key in target_modules_list): continue
+        galore_params.append(module.weight)
+
+    id_galore_params = [id(p) for p in galore_params]
+    regular_params = [p for p in model.parameters() if id(p) not in id_galore_params and p.requires_grad]
+    print(f"Number of regular parameters: {len(regular_params)}")
+    print(f"Number of GaLore parameters: {len(galore_params)}")
+
+    param_groups = [{'params': regular_params}, 
+                    {'params': galore_params, 'rank': galore_rank, 'update_proj_gap': galore_update_proj_gap, 
+                    'scale': galore_scale, 'proj_type': galore_proj_type}]
+
+
+    # define optimizers
+    if optimizer_name.lower() == "adamw":
+        optimizer = torch.optim.AdamW(trainable_params, lr=learning_rate, weight_decay=weight_decay)
+
+    elif optimizer_name.lower() == "galore_adamw":
+        optimizer = GaLoreAdamW(param_groups, lr=learning_rate, weight_decay=weight_decay)
+
+    elif optimizer_name.lower() == "appollo_tensor":
+        optimizer = GaLoreAdamW_sgd(param_groups, lr=learning_rate, weight_decay=weight_decay)
+
+    elif optimizer_name.lower() == "appollo_random_channel":
+        optimizer = GaLoreAdamW_sgd(param_groups, lr=learning_rate, weight_decay=weight_decay)
+
+    elif optimizer_name.lower() == "appollo_svd_channel":
+        optimizer = GaLoreAdamW_sgd(param_groups, lr=learning_rate, weight_decay=weight_decay)
+
+    total_training_steps = len(train_data) * num_epochs // batch_size
+    scheduler = transformers.get_linear_schedule_with_warmup(
+        optimizer=optimizer,
+        num_warmup_steps=int(total_training_steps * 0.1),
+        num_training_steps=total_training_steps,
+    )
+
     trainer = transformers.Trainer(
         model=model,
         train_dataset=train_data,
         eval_dataset=val_data,
+        optimizers=(optimizer, scheduler),
         args=transformers.TrainingArguments(
             per_device_train_batch_size=micro_batch_size,
             gradient_accumulation_steps=gradient_accumulation_steps,
             gradient_checkpointing=use_gradient_checkpointing,
-            warmup_steps=100,
             num_train_epochs=num_epochs,
             learning_rate=learning_rate,
             weight_decay=weight_decay,
             bf16=True,
             logging_steps=10,
-            optim="adamw_torch",
             evaluation_strategy="steps" if val_set_size > 0 else "no",
             save_strategy="steps",
             eval_steps=eval_step if val_set_size > 0 else None,
