@@ -111,18 +111,17 @@ def train(
             base_model,
             load_in_8bit=False,
             device_map=device_map,
-            torch_dtype=torch.bfloat16,
             trust_remote_code=True,
         )
 
-    print(model)
-    # convert only linear layers to bfloat16
-    for name, p in model.named_parameters():
-        if 'layernorm' in name or 'norm' in name:
-            print(name)
-            p = p.to(torch.float32)
-        else:
-            p = p.to(torch.float32)
+    # print(model)
+    # # convert only linear layers to bfloat16
+    # for name, p in model.named_parameters():
+    #     if 'layernorm' in name or 'norm' in name:
+    #         print(name)
+    #         p = p.to(torch.float32)
+    #     else:
+    #         p = p.to(torch.float32)
 
 
 
