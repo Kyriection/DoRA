@@ -279,7 +279,7 @@ def train(
         model=model,
         train_dataset=train_data,
         eval_dataset=val_data,
-        optimizers=(optimizer, scheduler),
+        # optimizers=(optimizer, scheduler),
         args=transformers.TrainingArguments(
             per_device_train_batch_size=micro_batch_size,
             gradient_accumulation_steps=gradient_accumulation_steps,
