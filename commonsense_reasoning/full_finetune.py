@@ -289,6 +289,8 @@ def train(
             learning_rate=learning_rate,
             weight_decay=weight_decay,
             logging_steps=10,
+            fp16=True,
+            fp16_opt_level='O2',
             evaluation_strategy="steps" if val_set_size > 0 else "no",
             save_strategy="steps",
             eval_steps=eval_step if val_set_size > 0 else None,
