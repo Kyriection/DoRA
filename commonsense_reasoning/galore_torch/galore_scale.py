@@ -64,12 +64,12 @@ class AdamW(Optimizer):
         defaults = {"lr": lr, "betas": betas, "eps": eps, "weight_decay": weight_decay, "correct_bias": correct_bias}
         super().__init__(params, defaults)
 
-        # params_idx = 0
-        # for group in self.param_groups:
-        #     for p in group["params"]:
-        #         params_idx += 1
-        #         if p.requires_grad:
-        #             self.state[p]["seed"] = params_idx
+        params_idx = 0
+        for group in self.param_groups:
+            for p in group["params"]:
+                params_idx += 1
+                if p.requires_grad:
+                    self.state[p]["seed"] = params_idx
 
     @torch.no_grad()
     def step(self, closure: Callable = None):
@@ -104,7 +104,8 @@ class AdamW(Optimizer):
                         state["projector"] = GradientProjector(group["rank"], 
                             update_proj_gap=group["update_proj_gap"], 
                             alpha=group["scale"], 
-                            proj_type=group["proj_type"])
+                            proj_type=group["proj_type"],
+                            seed=state["seed"])
 
                     grad = state["projector"].project(grad, state["step"])
 
@@ -161,136 +162,6 @@ class AdamW(Optimizer):
                         state["scaling_grad"] = torch.norm(scaling_grad)
 
                     norm_grad = scaling_grad * np.sqrt(group["scale"])
-
-
-                # if "rank" in group:
-                #     scaling_factor = (
-                #         torch.norm(norm_grad, dim=1) /
-                #         (torch.norm(grad, dim=1) + 1e-8)
-                #     )
-                #     scaling_factor = scaling_factor.unsqueeze(1)
-                #     scaling_grad = p.grad * scaling_factor * np.sqrt(group["scale"])
-
-                #     # Norm-Growth Limiter
-                #     if "scaling_grad" in state:
-                #         scaling_grad_norm = torch.norm(scaling_grad)
-                #         limiter = max(
-                #                 scaling_grad_norm / 
-                #                 (state["scaling_grad"] + 1e-8),
-                #                 1.01,
-                #             ) / 1.01
-                #         scaling_grad = scaling_grad / limiter
-                #         state["scaling_grad"] = scaling_grad_norm / limiter
-                #     else:
-                #         state["scaling_grad"] = torch.norm(scaling_grad)
-
-                    # norm_grad = scaling_grad
-
-                # if "rank" in group:
-                #     # Norm-Based Scaling
-                #     norm_dim = 0 if norm_grad.shape[0] < norm_grad.shape[1] else 1
-                #     group_size = group['group_size']
-
-                #     if norm_dim == 1:
-                #         out_dim, in_dim = norm_grad.shape
-                #         norm_grad = norm_grad.reshape(out_dim // group_size, -1)
-                #         grad = grad.reshape(out_dim // group_size, -1)
-                #     else:
-                #         norm_grad = norm_grad.t()
-                #         grad = grad.t()
-                #         out_dim, in_dim = norm_grad.shape
-                #         norm_grad = norm_grad.reshape(out_dim // group_size, -1)
-                #         grad = grad.reshape(out_dim // group_size, -1)
-
-                #     scaling_factor = (
-                #         torch.norm(norm_grad, dim=-1) /
-                #         (torch.norm(grad, dim=-1) + 1e-8)
-                #     )
-                #     scaling_factor = scaling_factor.repeat(1, group_size).reshape(-1)
-                #     # print(scaling_factor.mean(), scaling_factor.shape)
-                #     if norm_dim == 1:
-                #         scaling_factor = scaling_factor.unsqueeze(1)
-
-                #     # print(norm_grad.shape, scaling_factor.shape, p.grad.shape)
-                #     # import pdb; pdb.set_trace()
-
-                #     scaling_grad = p.grad * scaling_factor
-
-                #     # Norm-Growth Limiter
-                #     if "scaling_grad" in state:
-                #         import pdb; pdb.set_trace()
-                #         scaling_grad_norm = torch.norm(scaling_grad)
-                #         limiter = max(
-                #                 scaling_grad_norm / 
-                #                 (state["scaling_grad"] + 1e-8),
-                #                 1.01,
-                #             ) / 1.01
-                #         scaling_grad = scaling_grad / limiter
-                #         state["scaling_grad"] = scaling_grad_norm / limiter
-                #         pdb.set_trace()
-                #     else:
-                #         state["scaling_grad"] = torch.norm(scaling_grad)
-                #     norm_grad = scaling_grad
-
-                # if "rank" in group:
-
-                #     if state["step"] < 1000:
-                #         norm_grad = state["projector"].project_back(norm_grad)
-                    
-                #     else:
-
-                #         scaling_factor = (
-                #             torch.norm(norm_grad) /
-                #             (torch.norm(grad) + 1e-8)
-                #         )
-
-                #         scaling_grad = p.grad * scaling_factor
-                #         state["scaling_factor"] = scaling_factor
-
-                #         # Norm-Growth Limiter
-                #         if "scaling_grad" in state:
-                #             scaling_grad_norm = torch.norm(scaling_grad)
-                #             limiter = max(
-                #                     scaling_grad_norm / 
-                #                     (state["scaling_grad"] + 1e-8),
-                #                     1.01,
-                #                 ) / 1.01
-                #             scaling_grad = scaling_grad / limiter
-                #             state["scaling_grad"] = scaling_grad_norm / limiter
-                #         else:
-                #             state["scaling_grad"] = torch.norm(scaling_grad)
-
-                #         norm_grad = scaling_grad
-
-                # if "rank" in group:
-                #     scaling_factor = (
-                #         torch.norm(norm_grad) /
-                #         (torch.norm(grad) + 1e-8)
-                #     )
-                #     # if "scaling_factor" in state:
-                #     #     acc_scaling_factor = state["scaling_factor"]
-                #     #     acc_scaling_factor.mul_(beta1).add_(scaling_factor, alpha=(1.0 - beta1))
-                #     #     state["scaling_factor"] = acc_scaling_factor
-                #     # else:
-
-                #     state["scaling_factor"] = scaling_factor * np.sqrt(group["scale"])
-
-                #     scaling_grad = p.grad * state["scaling_factor"]
-
-                #     # Norm-Growth Limiter
-                #     if "scaling_grad" in state:
-                #         scaling_grad_norm = torch.norm(scaling_grad)
-                #         limiter = max(
-                #                 scaling_grad_norm / 
-                #                 (state["scaling_grad"] + 1e-8),
-                #                 1.01,
-                #             ) / 1.01
-                #         scaling_grad = scaling_grad / limiter
-                #         state["scaling_grad"] = scaling_grad_norm / limiter
-                #     else:
-                #         state["scaling_grad"] = torch.norm(scaling_grad)
-
-                #     norm_grad = scaling_grad
 
                 p.add_(norm_grad, alpha=-step_size)
 

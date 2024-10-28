@@ -222,9 +222,17 @@ def train(
         model.model_parallel = True
 
 
-    from galore_torch import GaLoreAdamW, GaLoreAdamW_sgd
+    from galore_torch import GaLoreAdamW, GaLoreAdamW_sgd, GaLoreAdamW_scale, GaLoreAdamW_scale_svd
 
+    for name, p in model.named_parameters():
+        p.requires_grad = False
+        for target_name in target_modules:
+            if target_name in name:
+                p.requires_grad = True
+                break
+    
     trainable_params = [p for p in model.parameters() if p.requires_grad]
+    print(f"Number of trainable parameters: {len(trainable_params)}")
 
     galore_params = []
     target_modules_list = ["attn", "mlp"]
@@ -242,7 +250,6 @@ def train(
                     {'params': galore_params, 'rank': galore_rank, 'update_proj_gap': galore_update_proj_gap, 
                     'scale': galore_scale, 'proj_type': galore_proj_type}]
 
-
     # define optimizers
     if optimizer_name.lower() == "adamw":
         optimizer = torch.optim.AdamW(trainable_params, lr=learning_rate, weight_decay=weight_decay)
@@ -254,12 +261,12 @@ def train(
         optimizer = GaLoreAdamW_sgd(param_groups, lr=learning_rate, weight_decay=weight_decay)
 
     elif optimizer_name.lower() == "appollo_random_channel":
-        optimizer = GaLoreAdamW_sgd(param_groups, lr=learning_rate, weight_decay=weight_decay)
+        optimizer = GaLoreAdamW_scale(param_groups, lr=learning_rate, weight_decay=weight_decay)
 
     elif optimizer_name.lower() == "appollo_svd_channel":
-        optimizer = GaLoreAdamW_sgd(param_groups, lr=learning_rate, weight_decay=weight_decay)
+        optimizer = GaLoreAdamW_scale_svd(param_groups, lr=learning_rate, weight_decay=weight_decay)
 
-    total_training_steps = len(train_data) * num_epochs // batch_size
+    total_training_steps = len(train_data) * num_epochs // batch_size + 1
     print(f"Total training steps: {total_training_steps}")
     scheduler = transformers.get_linear_schedule_with_warmup(
         optimizer=optimizer,

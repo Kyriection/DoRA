@@ -12,6 +12,7 @@ from .adamw_scale import AdamW as AdamW_scale
 
 # dev: scale_galore
 from .galore_scale import AdamW as GaLoreAdamW_scale
+from .galore_scale_svd import AdamW as GaLoreAdamW_scale_svd
 from .galore_scale_spam import AdamW as GaLoreAdamW_scale_spam
 from .galore_scale_spam2 import AdamW as GaLoreAdamW_scale_spam2
 

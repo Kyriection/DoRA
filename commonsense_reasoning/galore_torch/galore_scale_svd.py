@@ -64,13 +64,6 @@ class AdamW(Optimizer):
         defaults = {"lr": lr, "betas": betas, "eps": eps, "weight_decay": weight_decay, "correct_bias": correct_bias}
         super().__init__(params, defaults)
 
-        params_idx = 0
-        for group in self.param_groups:
-            for p in group["params"]:
-                params_idx += 1
-                if p.requires_grad:
-                    self.state[p]["seed"] = params_idx
-
     @torch.no_grad()
     def step(self, closure: Callable = None):
         """
@@ -99,12 +92,7 @@ class AdamW(Optimizer):
                 # GaLore Projection
                 if "rank" in group:
                     if "projector" not in state:
-                        
-                        state["projector"] = GradientProjector(group["rank"], 
-                            update_proj_gap=group["update_proj_gap"], 
-                            alpha=group["scale"], 
-                            proj_type=group["proj_type"],
-                            seed=state["seed"])
+                        state["projector"] = GaLoreProjector(group["rank"], update_proj_gap=group["update_proj_gap"], scale=group["scale"], proj_type=group["proj_type"])
 
                     grad = state["projector"].project(grad, state["step"])
 
@@ -136,12 +124,16 @@ class AdamW(Optimizer):
                 norm_grad = exp_avg / denom
 
                 if "rank" in group:
+                    # Norm-Based Scaling
+                    norm_dim = 0 if norm_grad.shape[0] < norm_grad.shape[1] else 1
                     scaling_factor = (
-                        torch.norm(norm_grad) /
-                        (torch.norm(grad) + 1e-8)
+                        torch.norm(norm_grad, dim=norm_dim) /
+                        (torch.norm(grad, dim=norm_dim) + 1e-8)
                     )
-                    state["scaling_factor"] = scaling_factor
-                    scaling_grad = p.grad * state["scaling_factor"]
+                    if norm_dim == 1:
+                        scaling_factor = scaling_factor.unsqueeze(1)
+
+                    scaling_grad = p.grad * scaling_factor
 
                     # Norm-Growth Limiter
                     if "scaling_grad" in state:
