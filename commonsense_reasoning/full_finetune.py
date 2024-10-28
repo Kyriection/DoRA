@@ -114,7 +114,11 @@ def train(
             trust_remote_code=True,
         )
 
-    model = model.to(dtype=torch.bfloat16)
+    # convert only linear layers to bfloat16
+    for name, p in model.named_modules():
+        if isinstance(p, nn.Linear):
+            p.weight.to(dtype=torch.bfloat16)
+
 
     if model.config.model_type == "llama":
         # Due to the name of transformers' LlamaTokenizer, we have to do this
