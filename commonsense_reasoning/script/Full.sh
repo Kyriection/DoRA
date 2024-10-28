@@ -12,7 +12,8 @@ CUDA_VISIBLE_DEVICES=$1 python -u full_finetune.py \
     --output_dir $2 \
     --batch_size 16 --micro_batch_size 1 --num_epochs 3 \
     --learning_rate 3e-5 --cutoff_len 256 --val_set_size 120 \
-    --eval_step 80 --save_step 80 
+    --eval_step 80 --save_step 80 \
+    --target_modules '["q_proj", "k_proj", "v_proj", "up_proj", "down_proj"]'
 
 
 
