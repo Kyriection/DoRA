@@ -255,6 +255,7 @@ def load_model(args) -> tuple:
         model = AutoModelForCausalLM.from_pretrained(
             base_model,
             load_in_8bit=load_8bit,
+            torch_dtype=torch.float16,
             device_map="auto",
             trust_remote_code=True,
         ) 
