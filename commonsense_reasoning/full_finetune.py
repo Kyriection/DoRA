@@ -121,6 +121,8 @@ def train(
         if 'layernorm' in name or 'norm' in name:
             print(name)
             p = p.to(torch.float32)
+        else:
+            p = p.to(torch.float32)
 
 
 
