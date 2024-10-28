@@ -7,7 +7,7 @@
 # license agreement from NVIDIA CORPORATION is strictly prohibited.
 
 CUDA_VISIBLE_DEVICES=$1 python -u full_finetune.py \
-    --base_model 'meta-llama/Llama-3.2-3B' \
+    --base_model 'meta-llama/Llama-3.2-1B' \
     --data_path 'commonsense_15k.json' \
     --output_dir $2 \
     --batch_size 16 --micro_batch_size 16 --num_epochs 3 \

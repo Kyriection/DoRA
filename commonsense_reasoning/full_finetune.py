@@ -114,7 +114,7 @@ def train(
             trust_remote_code=True,
         )
 
-    model = model.to(dtype=torch.bfloat16)
+    # model = model.to(dtype=torch.bfloat16)
 
     if model.config.model_type == "llama":
         # Due to the name of transformers' LlamaTokenizer, we have to do this
@@ -289,7 +289,6 @@ def train(
             learning_rate=learning_rate,
             weight_decay=weight_decay,
             logging_steps=10,
-            bf16=True,
             evaluation_strategy="steps" if val_set_size > 0 else "no",
             save_strategy="steps",
             eval_steps=eval_step if val_set_size > 0 else None,
