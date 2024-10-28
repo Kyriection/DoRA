@@ -118,7 +118,7 @@ def train(
     print(model)
     # convert only linear layers to bfloat16
     for name, p in model.named_parameters():
-        if 'layernorm' in name:
+        if 'layernorm' in name or 'embed_tokens' in name:
             print(name)
             p = p.to(torch.float32)
 
