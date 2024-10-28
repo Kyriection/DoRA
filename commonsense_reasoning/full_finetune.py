@@ -110,7 +110,7 @@ def train(
         model = AutoModelForCausalLM.from_pretrained(
             base_model,
             load_in_8bit=False,
-            torch_dtype=torch.bfloat16,
+            torch_dtype=torch.float16,
             device_map=device_map,
             trust_remote_code=True,
         )
@@ -287,7 +287,7 @@ def train(
             num_train_epochs=num_epochs,
             learning_rate=learning_rate,
             weight_decay=weight_decay,
-            bf16=True,
+            fp16=True,
             logging_steps=10,
             evaluation_strategy="steps" if val_set_size > 0 else "no",
             save_strategy="steps",
