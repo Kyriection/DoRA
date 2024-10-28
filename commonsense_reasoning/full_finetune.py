@@ -287,7 +287,7 @@ def train(
         optimizer = GaLoreAdamW_scale_svd(param_groups, lr=learning_rate, weight_decay=weight_decay)
     
     elif optimizer_name.lower() == "fira":
-        optimizer = FiraAdamW(param_groups, lr=learning_rate, weight_decay=weight_decay)
+        optimizer = FiraAdamW(param_groups, lr=learning_rate)
 
 
     total_training_steps = len(train_data) * num_epochs // batch_size + 1
@@ -316,7 +316,7 @@ def train(
             eval_steps=eval_step if val_set_size > 0 else None,
             save_steps=save_step,
             output_dir=output_dir,
-            save_total_limit=3,
+            save_total_limit=2,
             load_best_model_at_end=True if val_set_size > 0 else False,
             ddp_find_unused_parameters=False if ddp else None,
             group_by_length=group_by_length,
@@ -331,6 +331,8 @@ def train(
 
     if torch.__version__ >= "2" and sys.platform != "win32":
         model = torch.compile(model)
+    
+    model.save_pretrained(output_dir)
 
     trainer.train(resume_from_checkpoint=resume_from_checkpoint)
 
