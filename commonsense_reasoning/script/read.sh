@@ -14,6 +14,6 @@ cat $1/boolq.txt | grep 'test:3270/3270 | accuracy'
 echo "ARC-E"
 cat $1/ARC-Easy.txt | grep 'test:2376/2376 | accuracy'
 echo "ARC-C"
-cat $1/ARC-Challenge.txt | grep 'test:1172/1172 | accuracy
+cat $1/ARC-Challenge.txt | grep 'test:1172/1172 | accuracy'
 
 
