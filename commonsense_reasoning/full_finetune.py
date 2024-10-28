@@ -260,6 +260,7 @@ def train(
         optimizer = GaLoreAdamW_sgd(param_groups, lr=learning_rate, weight_decay=weight_decay)
 
     total_training_steps = len(train_data) * num_epochs // batch_size
+    print(f"Total training steps: {total_training_steps}")
     scheduler = transformers.get_linear_schedule_with_warmup(
         optimizer=optimizer,
         num_warmup_steps=int(total_training_steps * 0.1),
