@@ -16,7 +16,7 @@
 #     --target_modules '["q_proj", "k_proj", "v_proj", "up_proj", "down_proj"]' \
 #     --optimizer_name adamw
 
-for task in boolq; do
+for task in winogrande; do
 CUDA_VISIBLE_DEVICES=$1 python full_evaluate.py \
     --model LLaMA3-8B \
     --adapter Full \
