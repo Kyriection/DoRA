@@ -21,7 +21,7 @@ CUDA_VISIBLE_DEVICES=$1 python full_evaluate.py \
     --model LLaMA3-8B \
     --adapter Full \
     --dataset ${task} \
-    --base_model 'meta-llama/Llama-2-7b' \
+    --base_model 'meta-llama/Llama-2-7b-hf' \
     --batch_size 1 \
     --lora_weights $2|tee -a $2/${task}.txt
 done
