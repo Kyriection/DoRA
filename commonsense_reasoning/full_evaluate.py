@@ -251,53 +251,14 @@ def load_model(args) -> tuple:
         0  # unk. we want this to be different from the eos token
     )
     if device == "cuda":
+        print(f'loading from {lora_weights}')
         model = AutoModelForCausalLM.from_pretrained(
-            base_model,
+            lora_weights,
             load_in_8bit=load_8bit,
             torch_dtype=torch.float16,
             device_map="auto",
             trust_remote_code=True,
-        ) # fix zwq
-        model = PeftModel.from_pretrained(
-            model,
-            lora_weights,
-            torch_dtype=torch.float16,
-            device_map={"":0}
-        )
-    elif device == "mps":
-        model = AutoModelForCausalLM.from_pretrained(
-            base_model,
-            device_map={"": device},
-            torch_dtype=torch.float16,
-        )
-        model = PeftModel.from_pretrained(
-            model,
-            lora_weights,
-            device_map={"": device},
-            torch_dtype=torch.float16,
-        )
-    else:
-        model = AutoModelForCausalLM.from_pretrained(
-            base_model, device_map={"": device}, low_cpu_mem_usage=True
-        )
-        model = PeftModel.from_pretrained(
-            model,
-            lora_weights,
-            device_map={"": device},
-        )
-
-        # unwind broken decapoda-research config
-        model.config.pad_token_id = tokenizer.pad_token_id = 0  # unk
-        model.config.bos_token_id = 1
-        model.config.eos_token_id = 2
-
-        if not load_8bit:
-            model.half()  # seems to fix bugs for some users.
-
-        model.eval()
-        if torch.__version__ >= "2" and sys.platform != "win32":
-            model = torch.compile(model)
-
+        ) 
     return tokenizer, model
 
 
