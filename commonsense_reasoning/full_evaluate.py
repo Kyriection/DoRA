@@ -239,13 +239,15 @@ def load_model(args) -> tuple:
         raise ValueError(f'can not find lora weight, the value is: {lora_weights}')
 
     load_8bit = args.load_8bit
-    if "LLaMA" in args.model:
-        if "Llama-3" in base_model:
-            tokenizer = AutoTokenizer.from_pretrained(base_model)
-        # else:
-        #     tokenizer = LlamaTokenizer.from_pretrained(base_model)
-    else:
-        tokenizer = AutoTokenizer.from_pretrained(base_model)
+    # if "LLaMA" in args.model:
+    #     if "Llama-3" in base_model:
+    #         tokenizer = AutoTokenizer.from_pretrained(base_model)
+    #     else:
+    #         tokenizer = LlamaTokenizer.from_pretrained(base_model)
+    # else:
+    #     tokenizer = AutoTokenizer.from_pretrained(base_model)
+
+    tokenizer = AutoTokenizer.from_pretrained(base_model)
     tokenizer.padding_side = "left"
     tokenizer.pad_token_id = (
         0  # unk. we want this to be different from the eos token
