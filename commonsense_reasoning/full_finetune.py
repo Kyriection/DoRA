@@ -239,7 +239,8 @@ def train(
     for module_name, module in model.named_modules():
         if not isinstance(module, nn.Linear): continue
         if not any(target_key in module_name for target_key in target_modules_list): continue
-        galore_params.append(module.weight)
+        if module.weight.requires_grad:
+            galore_params.append(module.weight)
 
     id_galore_params = [id(p) for p in galore_params]
     regular_params = [p for p in model.parameters() if id(p) not in id_galore_params and p.requires_grad]
