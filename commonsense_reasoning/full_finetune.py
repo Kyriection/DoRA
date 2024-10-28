@@ -115,6 +115,7 @@ def train(
             trust_remote_code=True,
         )
 
+    print(model)
     # convert only linear layers to bfloat16
     for name, p in model.named_modules():
         if isinstance(p, nn.LayerNorm):
