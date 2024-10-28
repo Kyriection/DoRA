@@ -232,6 +232,7 @@ def train(
 
 
     from galore_torch import GaLoreAdamW, GaLoreAdamW_sgd, GaLoreAdamW_scale, GaLoreAdamW_scale_svd
+    from fira import FiraAdamW
 
     for name, p in model.named_parameters():
         p.requires_grad = False
@@ -263,6 +264,12 @@ def train(
                     {'params': galore_params, 'rank': galore_rank, 'update_proj_gap': galore_update_proj_gap, 
                     'scale': galore_scale, 'proj_type': galore_proj_type}]
 
+    if optimizer_name.lower() == "fira":
+        param_groups = [{'params': regular_params}, 
+                        {'params': galore_params, 'rank': galore_rank, 'update_proj_gap': galore_update_proj_gap, 
+                        'alpha': galore_scale, 'proj_type': galore_proj_type}]
+
+
     # define optimizers
     if optimizer_name.lower() == "adamw":
         optimizer = torch.optim.AdamW(trainable_params, lr=learning_rate, weight_decay=weight_decay)
@@ -278,6 +285,10 @@ def train(
 
     elif optimizer_name.lower() == "appollo_svd_channel":
         optimizer = GaLoreAdamW_scale_svd(param_groups, lr=learning_rate, weight_decay=weight_decay)
+    
+    elif optimizer_name.lower() == "fira":
+        optimizer = FiraAdamW(param_groups, lr=learning_rate, weight_decay=weight_decay)
+
 
     total_training_steps = len(train_data) * num_epochs // batch_size + 1
     print(f"Total training steps: {total_training_steps}")
