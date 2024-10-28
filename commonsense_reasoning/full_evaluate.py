@@ -242,8 +242,8 @@ def load_model(args) -> tuple:
     if "LLaMA" in args.model:
         if "Llama-3" in base_model:
             tokenizer = AutoTokenizer.from_pretrained(base_model)
-        else:
-            tokenizer = LlamaTokenizer.from_pretrained(base_model)
+        # else:
+        #     tokenizer = LlamaTokenizer.from_pretrained(base_model)
     else:
         tokenizer = AutoTokenizer.from_pretrained(base_model)
     tokenizer.padding_side = "left"
