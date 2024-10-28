@@ -117,6 +117,7 @@ def train(
     # convert only linear layers to bfloat16
     for name, p in model.named_modules():
         if isinstance(p, nn.Linear):
+            print(p)
             p.weight.to(dtype=torch.bfloat16)
 
 
