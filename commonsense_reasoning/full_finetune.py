@@ -117,11 +117,11 @@ def train(
 
     print(model)
     # convert only linear layers to bfloat16
-    for name, p in model.named_modules():
-        if isinstance(p, nn.LayerNorm):
-            import pdb; pdb.set_trace()
-            print(p)
-            p.weight.float()
+    for name, p in model.named_parameters():
+        if 'layernorm' in name:
+            print(name)
+            p = p.to(torch.float32)
+
 
 
     if model.config.model_type == "llama":
