@@ -124,7 +124,6 @@ def train(
     #         p = p.to(torch.float32)
 
 
-
     if model.config.model_type == "llama":
         # Due to the name of transformers' LlamaTokenizer, we have to do this
         if "Llama-3" in base_model:
@@ -243,6 +242,9 @@ def train(
     
     trainable_params = [p for p in model.parameters() if p.requires_grad]
     print(f"Number of trainable parameters: {len(trainable_params)}")
+    for name, p in model.named_parameters():
+        if p.requires_grad:
+            print(name, p.requires_grad)
 
     galore_params = []
     target_modules_list = ["attn", "mlp"]
@@ -289,7 +291,7 @@ def train(
         model=model,
         train_dataset=train_data,
         eval_dataset=val_data,
-        # optimizers=(optimizer, scheduler),
+        optimizers=(optimizer, scheduler),
         args=transformers.TrainingArguments(
             per_device_train_batch_size=micro_batch_size,
             gradient_accumulation_steps=gradient_accumulation_steps,
@@ -298,7 +300,6 @@ def train(
             learning_rate=learning_rate,
             weight_decay=weight_decay,
             logging_steps=10,
-            bf16=True,
             evaluation_strategy="steps" if val_set_size > 0 else "no",
             save_strategy="steps",
             eval_steps=eval_step if val_set_size > 0 else None,
