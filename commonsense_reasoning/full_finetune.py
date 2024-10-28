@@ -111,14 +111,16 @@ def train(
             base_model,
             load_in_8bit=False,
             device_map=device_map,
+            torch_dtype=torch.bfloat16,
             trust_remote_code=True,
         )
 
     # convert only linear layers to bfloat16
     for name, p in model.named_modules():
-        if isinstance(p, nn.Linear):
+        if isinstance(p, nn.LayerNorm):
+            import pdb; pdb.set_trace()
             print(p)
-            p.weight.to(dtype=torch.bfloat16)
+            p.weight.float()
 
 
     if model.config.model_type == "llama":
