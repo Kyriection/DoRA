@@ -1,9 +1,9 @@
 CUDA_VISIBLE_DEVICES=$1 python -u full_finetune.py \
     --base_model 'meta-llama/Llama-3.2-1B' \
     --data_path 'commonsense_170k.json' \
-    --output_dir $2 \
+    --output_dir apollo_mini_${2}_${3} \
     --batch_size 32 --micro_batch_size 32 --num_epochs 3 \
-    --learning_rate $4 --cutoff_len 256 --val_set_size 120 \
+    --learning_rate $2 --cutoff_len 256 --val_set_size 120 \
     --eval_step 80 --save_step 80 \
     --target_modules '["q_proj", "k_proj", "v_proj", "up_proj", "down_proj"]' \
     --optimizer_name appollo_tensor --galore_rank 1 --galore_scale $3 
