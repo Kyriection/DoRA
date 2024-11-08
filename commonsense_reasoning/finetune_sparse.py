@@ -34,9 +34,11 @@ from peft import (  # noqa: E402
 )
 from transformers import AutoModelForCausalLM, AutoTokenizer, LlamaTokenizer, AutoModel  # noqa: F402
 
+from module import R_Sparse_Linear, LlamaForCausalLM_Sparse_Aware
 
 def train(
         # model/data params
+        activation_sparsity: float = 0.0,
         base_model: str = "",  # the only required argument
         data_path: str = "yahma/alpaca-cleaned",
         output_dir: str = "./lora-alpaca",
@@ -139,24 +141,35 @@ def train(
     if len(wandb_log_model) > 0:
         os.environ["WANDB_LOG_MODEL"] = wandb_log_model
 
-    if load_8bit:
-        model = AutoModelForCausalLM.from_pretrained(
+    # if load_8bit:
+    #     model = AutoModelForCausalLM.from_pretrained(
+    #         base_model,
+    #         load_in_8bit=load_8bit,
+    #         torch_dtype=torch.float16,
+    #         device_map=device_map,
+    #         trust_remote_code=True,
+    #     )
+    # else:
+    #     model = AutoModelForCausalLM.from_pretrained(
+    #         base_model,
+    #         load_in_8bit=False,
+    #         torch_dtype=torch.float16,
+    #         device_map={"": int(os.environ.get("LOCAL_RANK") or 0)},
+    #         trust_remote_code=True,
+    #     )
+
+
+    config = AutoConfig.from_pretrained(base_model)
+    config.sparsity = activation_sparsity
+    model = LlamaForCausalLM_Sparse_Aware.from_pretrained(
             base_model,
-            load_in_8bit=load_8bit,
-            torch_dtype=torch.float16,
-            device_map=device_map,
-            trust_remote_code=True,
-        )
-    else:
-        model = AutoModelForCausalLM.from_pretrained(
-            base_model,
+            config=config,
             load_in_8bit=False,
             torch_dtype=torch.float16,
             device_map={"": int(os.environ.get("LOCAL_RANK") or 0)},
             trust_remote_code=True,
         )
 
-    
     if model.config.model_type == "llama":
         # Due to the name of transformers' LlamaTokenizer, we have to do this
         # need to handle llama 3 separately
