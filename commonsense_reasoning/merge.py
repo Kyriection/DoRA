@@ -21,7 +21,7 @@ model = PeftModel.from_pretrained(
         device_map={"":0})
 
 checkpoints = {}
-for name, module in peft_model.named_modules():
+for name, module in model.named_modules():
     if hasattr(module, "lora_A") and hasattr(module, "lora_B"):
         print('Merging', name)
         lora_weight = module.lora_B.weight @ module.lora_A.weight * module.scaling
