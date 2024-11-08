@@ -9,7 +9,7 @@
 
 CUDA_VISIBLE_DEVICES=$1 python finetune_sparse.py \
     --base_model 'meta-llama/Llama-2-7b-hf' \
-    --data_path 'commonsense_170k.json' \
+    --data_path 'commonsense_15k.json' \
     --output_dir $2 \
     --batch_size 16  --micro_batch_size 16 --num_epochs 3 \
     --learning_rate 3e-4 --cutoff_len 256 --val_set_size 120 \
