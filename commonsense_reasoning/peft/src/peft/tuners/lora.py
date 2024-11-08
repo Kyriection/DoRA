@@ -185,7 +185,7 @@ class LoraModel(torch.nn.Module):
                             )
                             kwargs["fan_in_fan_out"] = self.peft_config.fan_in_fan_out = False
                     new_module = MergedLinear(in_features, out_features, bias=bias, **kwargs)
-                print(target)
+                print(target, isinstance(target, R_Sparse_Linear), self.peft_config.enable_lora)
                 self._replace_module(parent, target_name, new_module, target)
         if not is_target_modules_in_base_model:
             raise ValueError(
