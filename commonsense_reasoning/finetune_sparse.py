@@ -38,7 +38,7 @@ from module import R_Sparse_Linear, LlamaForCausalLM_Sparse_Aware
 
 def train(
         # model/data params
-        activation_sparsity: float = 0.0,
+        activation_sparsity: float = 0.5,
         base_model: str = "",  # the only required argument
         data_path: str = "yahma/alpaca-cleaned",
         output_dir: str = "./lora-alpaca",
