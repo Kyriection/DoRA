@@ -20,6 +20,8 @@ peft_model = PeftModel.from_pretrained(
         torch_dtype=torch.float16,
         device_map={"":0})
 
+import pdb; pdb.set_trace()
+
 checkpoints = {}
 for name, module in peft_model.named_modules():
     if hasattr(module, "lora_A") and hasattr(module, "lora_B"):
@@ -30,5 +32,6 @@ for name, module in peft_model.named_modules():
 for name, p in model.named_parameters():
     if name in checkpoints:
         p.data = checkpoints[name]
+
 
 torch.save(model.state_dict(), "llama2_7b_ft_50sparsity/pytorch_model.bin")
