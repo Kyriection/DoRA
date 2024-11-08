@@ -34,5 +34,9 @@ for name, p in model.named_parameters():
             checkpoints[name] = p.data
 
 print(checkpoints.keys())
+new_checkpoints = {}
+for key in checkpoints:
+    name = key[len('base_model.'):]
+    new_checkpoints[name] = checkpoints[key]
 
-torch.save(checkpoints, "llama2_7b_ft_50sparsity/pytorch_model.bin")
+torch.save(new_checkpoints, "llama2_7b_ft_50sparsity/pytorch_model.bin")
