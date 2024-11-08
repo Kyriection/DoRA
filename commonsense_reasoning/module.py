@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from transformers.models.llama.modeling_llama import LlamaForCausalLM
 
 class R_Sparse_Linear(nn.Module):
     def __init__(self, in_features, out_features, sparsity=0, bias=True, device=None, dtype=None):
