@@ -96,6 +96,7 @@ class PeftConfigMixin(PushToHubMixin):
                 Additional keyword arguments passed along to the child class initialization.
         """
         if os.path.isfile(os.path.join(pretrained_model_name_or_path, CONFIG_NAME)):
+            print(os.path.join(pretrained_model_name_or_path, CONFIG_NAME))
             config_file = os.path.join(pretrained_model_name_or_path, CONFIG_NAME)
         else:
             try:
