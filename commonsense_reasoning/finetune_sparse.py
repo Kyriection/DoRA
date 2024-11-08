@@ -32,7 +32,7 @@ from peft import (  # noqa: E402
     prepare_model_for_int8_training,
     set_peft_model_state_dict,
 )
-from transformers import AutoModelForCausalLM, AutoTokenizer, LlamaTokenizer, AutoModel  # noqa: F402
+from transformers import AutoModelForCausalLM, AutoTokenizer, LlamaTokenizer, AutoModel, AutoConfig  # noqa: F402
 
 from module import R_Sparse_Linear, LlamaForCausalLM_Sparse_Aware
 
