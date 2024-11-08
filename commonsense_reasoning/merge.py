@@ -14,13 +14,11 @@ model = AutoModelForCausalLM.from_pretrained(
         device_map="auto",
         trust_remote_code=True)
 
-peft_model = PeftModel.from_pretrained(
+model = PeftModel.from_pretrained(
         model,
         lora_weights,
         torch_dtype=torch.float16,
         device_map={"":0})
-
-import pdb; pdb.set_trace()
 
 checkpoints = {}
 for name, module in peft_model.named_modules():
@@ -29,9 +27,12 @@ for name, module in peft_model.named_modules():
         lora_weight = module.lora_B.weight @ module.lora_A.weight * module.scaling
         checkpoints[name+'.weight'] = module.weight.data + lora_weight
 
+
 for name, p in model.named_parameters():
-    if name in checkpoints:
-        p.data = checkpoints[name]
+    if not name in checkpoints:
+        if not 'lora' in name:
+            checkpoints[name] = p.data
 
+print(checkpoints.keys())
 
-torch.save(model.state_dict(), "llama2_7b_ft_50sparsity/pytorch_model.bin")
+torch.save(checkpoints, "llama2_7b_ft_50sparsity/pytorch_model.bin")
