@@ -1,7 +1,9 @@
 import numpy 
 import os 
+import sys 
 import torch 
 from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
+sys.path.append(os.path.join(os.getcwd(), "peft/src/"))
 from peft import PeftModel
 
 lora_weights = sys.argv[1]
