@@ -26,7 +26,7 @@ import torch.nn.functional as F
 from transformers.pytorch_utils import Conv1D
 
 from ..utils import PeftConfig, PeftType, transpose
-
+from .module import R_Sparse_Linear
 
 def is_bnb_available():
     return importlib.util.find_spec("bitsandbytes") is not None
@@ -162,9 +162,14 @@ class LoraModel(torch.nn.Module):
                     else:
                         kwargs.update({"enable_lora": self.peft_config.enable_lora})
                         new_module = MergedLinear8bitLt(target.in_features, target.out_features, bias=bias, **kwargs)
+
                 elif isinstance(target, torch.nn.Linear) and self.peft_config.enable_lora is None:
-                    print(target)
                     new_module = Linear(target.in_features, target.out_features, bias=bias, **kwargs)
+
+                elif isinstance(target, R_Sparse_Linear) and self.peft_config.enable_lora is None:
+                    print('Lora with R_Sparse_Linear', target)
+                    new_module = R_Sparse_Linear(target.in_features, target.out_features, bias=bias, **kwargs)
+
                 elif self.peft_config.enable_lora is not None:
                     kwargs.update({"enable_lora": self.peft_config.enable_lora})
                     if isinstance(target, Conv1D):
