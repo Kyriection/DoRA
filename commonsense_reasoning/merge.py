@@ -27,12 +27,6 @@ for name, module in model.named_modules():
         lora_weight = module.lora_B.weight @ module.lora_A.weight * module.scaling
         checkpoints[name+'.weight'] = module.weight.data + lora_weight
 
-
-for name, p in model.named_parameters():
-    if not name in checkpoints:
-        if not 'lora' in name:
-            checkpoints[name] = p.data
-
 print(checkpoints.keys())
 new_checkpoints = {}
 for key in checkpoints:
