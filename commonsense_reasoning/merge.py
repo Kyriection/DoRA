@@ -23,7 +23,7 @@ peft_model = PeftModel.from_pretrained(
 checkpoints = {}
 for name, module in peft_model.named_modules():
     if hasattr(module, "lora_A") and hasattr(module, "lora_B"):
-        import pdb; pdb.set_trace()
+        print('Merging', name)
         lora_weight = module.lora_B.weight @ module.lora_A.weight * module.scaling
         checkpoints[name+'.weight'] = module.weight.data + lora_weight
 
